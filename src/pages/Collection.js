@@ -128,35 +128,53 @@ function Collection() {
 
 
 
-  // useEffect(() => {
-  //   const getWatches = async () => {
+  useEffect(() => {
+    const getWatches = async () => {
 
-  //     console.log("Search Database");
+      console.log("Search Database");
 
-  //     getDocs(colRef).then((snapshot) => {
-  //       let watches = [];
-  //       snapshot.docs.forEach((doc) => {
-  //         let watch = {
-  //           name: doc.data().name,
-  //           dateObtained: new Date(doc.data().dateObtained.seconds*1000).toISOString().slice(0, 10),
-  //           pricePurchased: doc.data().pricePurchased,
-  //           resaleValue: doc.data().resaleValue,
-  //           imgURL: doc.data().imgURL,
-  //         }
+      getDocs(colRef).then((snapshot) => {
+        let watches = [];
+        snapshot.docs.forEach((doc) => {
+          let watch = {
+            name: doc.data().name,
+            dateObtained: new Date(doc.data().dateObtained.seconds*1000).toISOString().slice(0, 10),
+            pricePurchased: doc.data().pricePurchased,
+            resaleValue: doc.data().resaleValue,
+            imgURL: doc.data().imgURL,
+          }
 
-  //         watches.push({ ...watch, id: doc.id })
-  //       })
+          watches.push({ ...watch, id: doc.id })
+        })
 
-  //       setCurrentCards(watches);
-  //     })
-  //     .catch(err => {
-  //       console.log("Error in getDocs: ", err.message);
-  //     })
-  //   }
+        setColumnData(
+          [{
+            id: 'column-1',
+            columnTitle: 'My Collection',
+            cards: watches
+          },
+          {
+            id: 'column-2',
+            columnTitle: 'Wish List',
+            cards: []
+          },
+          {
+            id: 'column-3',
+            columnTitle: 'Archived',
+            cards: []
+          }]
+        );
+        console.log(watches);
+        console.log("getting data");
+      })
+      .catch(err => {
+        console.log("Error in getDocs: ", err.message);
+      })
+    }
 
-  //   getWatches();
+    getWatches();
 
-  // }, [])
+  }, [])
 
 
   const onDragEnd = result => {
@@ -210,7 +228,6 @@ function Collection() {
     variants={pageVariants}
     
     className="Collection w-screen bg-main ">
-      <Navbar />
 
       <main className="mt-10 w-full">
         <DragDropContext onDragEnd={onDragEnd}>

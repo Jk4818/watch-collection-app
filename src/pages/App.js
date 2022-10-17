@@ -9,6 +9,9 @@ import {
 
 import Collection from "./Collection";
 import Home from "./Home";
+import SignUp from './SignUp';
+import Login from './Login';
+import Navbar from '../components/navbar';
 
 
 function App() {
@@ -17,10 +20,13 @@ function App() {
   return (
     <Router>
       <AnimatePresence mode="wait">
-        <div className='w-screen overflow-x-hidden'>
+        <div className='w-screen '>
+          <Navbar />
           <Routes >
             <Route exact path="/" element={<Home/>}/>
             <Route path="/collection" element={<Collection/>} />
+            <Route path="/signup" element={<SignUp/>} />
+            <Route path="/login" element={<Login/>} />
           </Routes >
         </div>
       </AnimatePresence>

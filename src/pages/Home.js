@@ -39,7 +39,6 @@ function Home(props) {
       variants={pageVariants}
 
       className="App w-screen bg-main">
-      <Navbar />
       <main className="">
         <section className='h-[38rem] w-full grid grid-cols-2 mb-10'>
           <div className='w-full flex items-center justify-center '>
