@@ -2,8 +2,8 @@ import { nanoid } from 'nanoid';
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 
-import { addDoc, collection, getDocs, Timestamp } from 'firebase/firestore';
-import {db} from "../firebase";
+import { addDoc, collection, Timestamp } from 'firebase/firestore';
+import { auth, db} from "../firebase";
 
 import { AiOutlinePlus } from 'react-icons/ai';
 import {BsArrowRightShort} from 'react-icons/bs';
@@ -26,11 +26,19 @@ function Card({addCard,}) {
       imgURL: data.Image_URL
     }
 
-    addDoc(colRef, newCard).then(() => {
-      setForm(false);
-    }).catch(err => {
-      console.log(err.message);
-    });
+    auth.onAuthStateChanged(user => {
+      if(user){
+        addDoc(colRef, newCard).then(() => {
+          setForm(false);
+        }).catch(err => {
+          console.log(err.message);
+        });
+      }
+      else{
+        console.log("Failed to add new watch.");
+      }
+
+    })
     
   };
 

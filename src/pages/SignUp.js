@@ -1,19 +1,14 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { motion } from "framer-motion";
 
 import { Link, useNavigate } from 'react-router-dom';
 
 import {
   GoogleAuthProvider,
-  getAuth,
   signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   sendPasswordResetEmail,
-  signOut,
 } from "firebase/auth";
 import {
-  getFirestore,
   query,
   getDocs,
   collection,
@@ -70,15 +65,36 @@ function SignUp(props) {
 
   //SIGNUP
 
+  const [signUpName, setSignUpName] = useState('');
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
   const signUpNavigate = useNavigate();
   const registerWithEmailAndPassword = (e) => {
     e.preventDefault();
-    console.log(signUpEmail,signUpPassword);
 
     auth.createUserWithEmailAndPassword(signUpEmail, signUpPassword).then(cred => {
       console.log(cred);
+      return db.collection('users').doc(cred.user.uid).set({
+        name: signUpName,
+        collection: [{
+          id: 'column-1',
+          columnTitle: 'My Collection',
+          cards: []
+        },
+        {
+          id: 'column-2',
+          columnTitle: 'Wish List',
+          cards: []
+        },
+        {
+          id: 'column-3',
+          columnTitle: 'Archived',
+          cards: []
+        }],
+        
+      });
+    }).then(() => {
+      
       signUpNavigate('/collection');
     });
   };
@@ -100,14 +116,16 @@ function SignUp(props) {
               </path>
             </svg>
             Continue with Google
-            </button>
+          </button>
 
           <p className='font-Actor tracking-wide font-semibold'>or</p>
 
           <form onSubmit={registerWithEmailAndPassword} className='flex flex-col gap-4 font-Actor text-center' >
-            <input onChange={(e) => setSignUpEmail(e.target.value)} className='h-12 border-2 border-black rounded-md p-2 bg-main focus:bg-white focus:outline-none focus:border-blue-500 ' name="email" type="email" placeholder="Email" required/>
+            <input onChange={(e) => setSignUpName(e.target.value)} className='h-12 border-2 border-black rounded-md p-2 bg-main focus:bg-white focus:outline-none focus:border-blue-500 ' name="name" type="name" placeholder="Name" required />
 
-            <input onChange={(e) => setSignUpPassword(e.target.value)} className='h-12 border-2 border-black rounded-md p-2 bg-main focus:bg-white focus:outline-none focus:border-blue-500 ' name="password" type="password" placeholder="Password" required/>
+            <input onChange={(e) => setSignUpEmail(e.target.value)} className='h-12 border-2 border-black rounded-md p-2 bg-main focus:bg-white focus:outline-none focus:border-blue-500 ' name="email" type="email" placeholder="Email" required />
+
+            <input onChange={(e) => setSignUpPassword(e.target.value)} className='h-12 border-2 border-black rounded-md p-2 bg-main focus:bg-white focus:outline-none focus:border-blue-500 ' name="password" type="password" placeholder="Password" required />
             <button className='h-12 border-2 border-black rounded-md bg-black text-main font-bold tracking-wide' type="submit">Create account</button>
 
             <div>Already have an account? <span className='text-blue-600 hover:underline hover:underline-offset-1 hover:font-semibold'><Link to="/login">Log in</Link></span></div>

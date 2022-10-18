@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 
 import {  Draggable } from "react-beautiful-dnd";
 
+import {sandboxWatches} from "../SandboxData";
+import { auth, db, } from "../firebase";
 
 import Card from "../components/card";
 import NewCard from "../components/newCard";
 
-function CardsContainer({provided, columnData, cards, setCards, archiveCards, setArchiveCards }) {
+function CardsContainer({provided, columnData, cardIds, setCards, archiveCards, setArchiveCards }) {
 
-
+  const [cardData, setCardData] = useState([]);
 
   //CARD FUNCTIONS
 
 
   function addCard(card) {
-    const newCards = [...cards, {
+    const newCards = [...cardData, {
       id: nanoid(),
       name: "Watch 1",
       dateObtained: "13/01/22",
@@ -27,18 +29,51 @@ function CardsContainer({provided, columnData, cards, setCards, archiveCards, se
   }
 
   function removeCard(index) {
-    const newCards = [...cards];
+    const newCards = [...cardData];
     newCards.splice(index, 1);
     setCards(newCards);
   }
 
   function archiveCard(index) {
-    const currentCard = cards[index];
+    const currentCard = cardData[index];
     const newArchiveCards = [...archiveCards, currentCard];
     setArchiveCards(newArchiveCards);
     removeCard(index);
   }
 
+  useEffect(() => {
+
+    const getCardData = async (cards) => {
+      cards.forEach(function(cardId){
+        db.collection('watches').doc(cardId).get().then(doc => {
+          let tempCardData = doc.data();
+          tempCardData.id = doc.id;
+          setCardData(oldArray => [...oldArray, tempCardData]);
+          console.log("data: ", tempCardData);
+        })
+      });
+
+
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        getCardData(cardIds);
+      }
+      else {
+        let tempCardData = [];
+        cardIds.forEach(function(cardId){
+          let obj = sandboxWatches.find(o => o.id === cardId);
+          tempCardData.push(obj);
+        });
+        console.log("data in state: ", tempCardData);
+        setCardData(tempCardData);
+      }
+    })
+
+
+  }, [cardIds])
+  
 
 
   return (
@@ -48,7 +83,7 @@ function CardsContainer({provided, columnData, cards, setCards, archiveCards, se
 
             <div className="w-full h-96 scrollbar-thumb-rounded-md scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 overflow-x-scroll  flex mt-8 px-4  justify-start items-center gap-12">
 
-              {cards.map((card, index) => (
+              {cardData.map((card, index) => (
 
                 <Draggable key={card.id} draggableId={card.id} index={index}>
                   {(provided, snapshot) => (

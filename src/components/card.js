@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { IoMdClose } from 'react-icons/io';
 
 function Card({ index, removeCard, id, name, dateObtained, pricePurchased, resaleValue, imgURL }) {
 
-
+  var currencyFormatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'GBP',
+  
+    // These options are needed to round to whole numbers if that's what you want.
+    //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+    //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+  });
 
   return (
     <div
@@ -27,9 +34,9 @@ function Card({ index, removeCard, id, name, dateObtained, pricePurchased, resal
         <div className='w-full h-1/3'>
           <h1 className='w-full overflow-hidden whitespace-nowrap text-xl text-center text-ellipsis'>{name}</h1>
           <ul className='text-sm pt-2 '>
-            <li>Date Obtained: {dateObtained}</li>
-            <li>Price Purchased: {pricePurchased}</li>
-            <li>Resale Value: ${resaleValue}</li>
+            <li>Date Obtained: {dateObtained.toDate().toLocaleDateString("en-US")}</li>
+            <li>Price Purchased: {currencyFormatter.format(pricePurchased)}</li>
+            <li>Resale Value: {currencyFormatter.format(resaleValue)}</li>
             <li className='text-[0.5rem]'>ID: {id}</li>
           </ul>
         </div>

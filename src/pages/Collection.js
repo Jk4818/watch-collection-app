@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { nanoid } from 'nanoid';
 import { motion } from "framer-motion";
 
 import { Droppable, DragDropContext } from "react-beautiful-dnd";
 import { collection, getDocs } from 'firebase/firestore';
 
-import Navbar from "../components/navbar";
-import { db, } from "../firebase";
+import { auth, db, } from "../firebase";
 import CardsContainer from '../components/cardsContainer';
+
+import {sandboxData} from "../SandboxData";
 
 
 
@@ -27,161 +27,95 @@ function Collection() {
 
 
 
-  const sandboxData = [
-    {
-      id: 'column-1',
-      columnTitle: 'My Collection',
-      cards: [
-        {
-          id: nanoid(),
-          name: "Omega Speedmaster Professional Moonwatch",
-          dateObtained: "13/01/22",
-          pricePurchased: "2500",
-          resaleValue: "3000",
-          imgURL: "https://www.omegawatches.com/media/catalog/product/cache/a5c37fddc1a529a1a44fea55d527b9a116f3738da3a2cc38006fcc613c37c391/o/m/omega-speedmaster-moonwatch-31130423001005-l.png",
-        },
-        {
-          id: nanoid(),
-          name: "Rolex Datejust 41mm",
-          dateObtained: "13/01/22",
-          pricePurchased: "2500",
-          resaleValue: "3000",
-          imgURL: "https://content.rolex.com/dam/2022/upright-bba/m126333-0010.png?impolicy=v6-upright",
-        },
-        {
-          id: nanoid(),
-          name: "Omega Seamaster Professional 300m",
-          dateObtained: "13/01/22",
-          pricePurchased: "2500",
-          resaleValue: "3000",
-          imgURL: "https://www.omegawatches.com/media/catalog/product/cache/a5c37fddc1a529a1a44fea55d527b9a116f3738da3a2cc38006fcc613c37c391/o/m/omega-seamaster-diver-300m-21030422004001-l.png",
-        },
-        {
-          id: nanoid(),
-          name: "Grand Seiko White Birch",
-          dateObtained: "13/01/22",
-          pricePurchased: "2500",
-          resaleValue: "3000",
-          imgURL: "https://www.grand-seiko.com/uk-en/-/media/Images/Product--Image/All/GrandSeiko/2022/02/19/23/14/SLGH005G/SLGH005G.png",
-        },
-        {
-          id: nanoid(),
-          name: "Breitling Navitimer",
-          dateObtained: "13/01/22",
-          pricePurchased: "2500",
-          resaleValue: "3000",
-          imgURL: "https://www.breitling.com/media/image/2/gallery_square_700/asset-version-4a836d168b/ab0139211g1p1-navitimer-b01-chronograph-41-soldier.png",
-        },
-      ]
-    },
-    {
-      id: 'column-2',
-      columnTitle: 'Wish List',
-      cards: [
-        {
-          id: nanoid(),
-          name: "Rolex Datejust 41mm",
-          dateObtained: "13/01/22",
-          pricePurchased: "2500",
-          resaleValue: "3000",
-          imgURL: "https://content.rolex.com/dam/2022/upright-bba/m126333-0010.png?impolicy=v6-upright",
-        },
-        {
-          id: nanoid(),
-          name: "Grand Seiko White Birch",
-          dateObtained: "13/01/22",
-          pricePurchased: "2500",
-          resaleValue: "3000",
-          imgURL: "https://www.grand-seiko.com/uk-en/-/media/Images/Product--Image/All/GrandSeiko/2022/02/19/23/14/SLGH005G/SLGH005G.png",
-        },
-      ]
-    },
-    {
-      id: 'column-3',
-      columnTitle: 'Archived',
-      cards: [
-        {
-          id: nanoid(),
-          name: "Omega Speedmaster Professional Moonwatch",
-          dateObtained: "13/01/22",
-          pricePurchased: "2500",
-          resaleValue: "3000",
-          imgURL: "https://www.omegawatches.com/media/catalog/product/cache/a5c37fddc1a529a1a44fea55d527b9a116f3738da3a2cc38006fcc613c37c391/o/m/omega-speedmaster-moonwatch-31130423001005-l.png",
-        },
-        {
-          id: nanoid(),
-          name: "Breitling Navitimer",
-          dateObtained: "13/01/22",
-          pricePurchased: "2500",
-          resaleValue: "3000",
-          imgURL: "https://www.breitling.com/media/image/2/gallery_square_700/asset-version-4a836d168b/ab0139211g1p1-navitimer-b01-chronograph-41-soldier.png",
-        },
-      ]
-    },
-  ];
 
-  const [columnData, setColumnData] = useState(sandboxData);
+  const [columnData, setColumnData] = useState([
+  {
+    id: 'column-1',
+    columnTitle: 'My Collection',
+    cards: []
+  },
+  {
+    id: 'column-2',
+    columnTitle: 'Wish List',
+    cards: []
+  },
+  {
+    id: 'column-3',
+    columnTitle: 'Archived',
+    cards: []
+  }]);
 
 
   //FIRESTORE DATABASE SERVICES
-  const colRef = collection(db, 'watches');
-
 
 
   useEffect(() => {
-    const getWatches = async () => {
+    const getWatches = async (userUid) => {
 
       console.log("Search Database");
 
-      getDocs(colRef).then((snapshot) => {
-        let watches = [];
-        snapshot.docs.forEach((doc) => {
-          let watch = {
-            name: doc.data().name,
-            dateObtained: new Date(doc.data().dateObtained.seconds*1000).toISOString().slice(0, 10),
-            pricePurchased: doc.data().pricePurchased,
-            resaleValue: doc.data().resaleValue,
-            imgURL: doc.data().imgURL,
-          }
+      // db.collection('watches').onSnapshot(snapshot => {
+      //   let watches = [];
+      //   snapshot.docs.forEach((doc) => {
+      //     let watch = {
+      //       name: doc.data().name,
+      //       dateObtained: new Date(doc.data().dateObtained.seconds * 1000).toISOString().slice(0, 10),
+      //       pricePurchased: doc.data().pricePurchased,
+      //       resaleValue: doc.data().resaleValue,
+      //       imgURL: doc.data().imgURL,
+      //     }
 
-          watches.push({ ...watch, id: doc.id })
-        })
+      //     watches.push({ ...watch, id: doc.id })
+      //   });
 
-        setColumnData(
-          [{
-            id: 'column-1',
-            columnTitle: 'My Collection',
-            cards: watches
-          },
-          {
-            id: 'column-2',
-            columnTitle: 'Wish List',
-            cards: []
-          },
-          {
-            id: 'column-3',
-            columnTitle: 'Archived',
-            cards: []
-          }]
-        );
-        console.log(watches);
-        console.log("getting data");
-      })
-      .catch(err => {
-        console.log("Error in getDocs: ", err.message);
+      //   setColumnData(
+      //     [{
+      //       id: 'column-1',
+      //       columnTitle: 'My Collection',
+      //       cards: watches
+      //     },
+      //     {
+      //       id: 'column-2',
+      //       columnTitle: 'Wish List',
+      //       cards: []
+      //     },
+      //     {
+      //       id: 'column-3',
+      //       columnTitle: 'Archived',
+      //       cards: []
+      //     }]
+      //   );
+      //   console.log(watches);
+      //   console.log("getting data");
+      // }, err => {
+      //   console.log("Error in getDocs: ", err.message);
+      // });
+
+      db.collection('users').doc(userUid).get().then(doc => {
+        setColumnData(doc.data().collection);
+        console.log("Received all data");
       })
     }
 
-    getWatches();
 
-  }, [])
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        getWatches(user.uid);
+      }
+      else {
+        console.log("Default sandbox");
+        setColumnData(sandboxData);
+      }
+    })
+
+  }, []);
 
 
   const onDragEnd = result => {
     if (!result.destination) return;
     const { source, destination } = result;
 
-    
+
 
     if (source.droppableId !== destination.droppableId) {
       console.log("different container");
@@ -203,9 +137,9 @@ function Collection() {
 
       setColumnData(columnData);
     }
-    else{
+    else {
       console.log("same container");
-      
+
       const sourceColIndex = columnData.findIndex(e => e.id === source.droppableId);
       const sourceCol = columnData[sourceColIndex];
       const sourceCards = [...sourceCol.cards];
@@ -221,13 +155,13 @@ function Collection() {
 
 
   return (
-    <motion.div 
-    initial="initial"
-    animate="in"
-    exit="out"
-    variants={pageVariants}
-    
-    className="Collection w-screen bg-main ">
+    <motion.div
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+
+      className="Collection w-screen bg-main ">
 
       <main className="mt-10 w-full">
         <DragDropContext onDragEnd={onDragEnd}>
@@ -237,10 +171,10 @@ function Collection() {
 
               {(provided) => (
                 <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}>
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}>
                   <CardsContainer
-                    columnData={column} provided={provided} cards={column.cards} setCards={setColumnData} />
+                    columnData={column} provided={provided} cardIds={column.cards} setCards={setColumnData} />
                 </div>
               )}
             </Droppable>
